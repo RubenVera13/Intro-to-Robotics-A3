@@ -1,0 +1,9 @@
+# MATLAB editor backup files
+*.asv
+*.m~
+
+# Simulink-generated cache and build folders
+slprj/
+*.slxc
+*_ert_rtw/
+codegen/
