@@ -1,73 +1,76 @@
-# 7-DOF Industrial Welding Robot — Dynamic Modeling & Inverse Dynamics Simulation
+# 7-DOF Welding-Path Robot Simulation
 
-**Course:** Introduction to Robotics, NTUST, Fall 2026 (final project)
-**Team:** Emmanuel Acosta, Ivan Arce,  Mauricio Olmedo, Rafael Pereira, Ruben Vera
+**Course:** Introduction to Robotics, NTUST, Fall 2026 (final project)  
+**Team:** Emmanuel Acosta, Ivan Arce, Mauricio Olmedo, Rafael Pereira, Ruben Vera
 
-## Project Overview
-This repository contains the design, kinematic/dynamic modeling, and simulation files for a **7-degree-of-freedom (7-DOF) robotic manipulator** equipped with a welding torch. Developed as the final team project for **Introduction to Robotics (Course No. M4609301)**, this project uses **MATLAB**, **Simulink**, and **Simscape Multibody** to simulate automated multi-shape welding trajectories and compute joint actuator torque profiles via inverse dynamics.
+## Project goal
 
-### Key Objectives
-* **Multi-Shape Path Tracing:** Guide the welding torch tip smoothly across three distinct geometric patterns—a **plus sign**, a **circle**, and a **star sign**—on a flat workpiece surface.
-* **Collision-Free Transitions:** Implement vertical lift-off and re-engagement trajectories when transitioning between welding shapes to avoid surface contact.
-* **Inverse Dynamics Analysis:** Compute the time-varying joint actuator torques required to execute the prescribed welding paths under gravitational and inertial loads.
+Build a seven-axis robot model, trace plus, circle, and star paths above a flat workpiece, and use Simscape Multibody inverse dynamics to estimate the required joint torques.
 
----
+This is an academic robot simulation. The current model represents the torch path and rigid-body kinematics; it does not simulate an arc, heat transfer, weld deposition, or a specific commercial robot.
 
-## System Architecture
+## Current status
 
-### Manipulator Configuration (7-DOF)
-The serial manipulator provides kinematic redundancy for flexible tool orientation and smooth path execution:
-1. **Waist Revolute Joint** (Base rotation)
-2. **Shoulder Joint**
-3. **Upper Elbow Joint**
-4. **Arm Twist Joint**
-5. **Wrist Universal Joint (Inboard)**
-6. **Wrist Universal Joint (Outboard)**
-7. **Tool / End-Effector Interface** (Welding Torch)
+The repository currently contains a **kinematic prototype** that generates the three paths, solves inverse kinematics, exports joint-position time series, and plots the TCP and joint trajectories. The Simscape model, CAD geometry, validated mass properties, and torque results are still to be added.
 
-### Simscape Multibody & Control Blocks
-* **Environment & Constraints:** `Floor` reference frame, `Workpiece` geometry positioned via `Workpiece XForm`, `Solver Configuration` (`f(x) = 0`), and `Mechanism Configuration`.
-* **Trajectory Controller:** Generates motion actuation signals for the torch tip across the plus, circle, and star paths, including lift segments between shapes.
-* **Torque Instrumentation:** Simulink scopes monitor actuator torque outputs (`Nm`) for the Waist Revolute, Shoulder, Upper Elbow, Arm Twist, and Wrist Universal (Inboard/Outboard) joints.
+The initial kinematic model uses seven single-axis revolute joints:
 
-## Getting Started
+| Axis | Joint | Local axis |
+|---:|---|---|
+| 1 | Waist | Z |
+| 2 | Shoulder | Y |
+| 3 | Upper elbow | Y |
+| 4 | Arm twist | Z |
+| 5 | Wrist inboard | Y |
+| 6 | Wrist outboard | X |
+| 7 | Tool interface roll | Z |
 
-### Prerequisites
-* **MATLAB** (R2024a or later recommended)
-* **Simulink**
-* **Simscape™** & **Simscape Multibody™**
-* **Robotics System Toolbox™**
+The torch tip is a fixed frame 0.15 m beyond the seventh joint. The dimensions and ±π joint bounds in the prototype are provisional values, not CAD measurements or mechanical stops. The wrist joints are modeled as individual revolute axes, not Simscape Universal Joint blocks.
 
-### Running the Simulation
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/<your-username>/7-DOF-Welding-Robot.git
-   cd 7-DOF-Welding-Robot
-   ```
-2. Open MATLAB and navigate to the project root folder.
-3. Run the initialization and simulation script:
-   ```matlab
-   run('matlab/run_simulation.m')
-   ```
-4. Inspect the 3D animation in **Mechanics Explorer** and open the `Actuator Torques` scope in `simulink/welding_robot_7dof.slx` to view joint torque curves.
+## Run the kinematic prototype
 
----
+### Requirements
 
-## Simulation Results & Analysis
-* **Path Accuracy:** Verify that the welding torch accurately traces the plus, circle, and star geometries on the workpiece plane and cleanly clears the surface during transitions.
-* **Actuator Torque Profiles (`Nm`):** Evaluate peak and continuous torque demands across all joints—particularly during sharp directional changes (corners of the plus and star) and vertical lift accelerations.
+- MATLAB R2024a or later
+- Robotics System Toolbox
 
----
+From the repository root, run:
 
-## Team Members
-* **Member 1** – Mechanical Design & CAD / URDF Modeling
-* **Member 2** – Simscape Multibody Assembly & Environment Setup
-* **Member 3** – Trajectory Generation (Plus, Circle, Star & Lift Logic)
-* **Member 4** – Inverse Dynamics & Actuator Torque Analysis
-* **Member 5** – Simulation Verification, Data Visualization & Documentation
----
+```matlab
+run('matlab/run_simulation.m')
+```
+
+The script leaves a `project_result` structure in the MATLAB workspace. It contains the robot, path, joint positions, Simulink-ready joint time series, per-sample IK statuses, and position/orientation error measurements. The script also opens path and joint-angle plots.
+
+The current entry point does **not** run Simscape or calculate torques. Simulink, Simscape, and Simscape Multibody will be required once that stage is integrated.
+
+## Model and parameter files
+
+- `matlab/init_robot_params.m` — shared kinematic, workpiece, path, and IK parameters.
+- `matlab/build_welding_robot.m` — creates the seven-revolute `rigidBodyTree` from those parameters.
+- `matlab/generate_welding_ik.m` — generates the path, solves IK, records per-sample errors, and plots results.
+- `matlab/run_simulation.m` — current project entry point.
+
+All lengths use metres, angles use radians, and time uses seconds. Before making physical torque claims, replace provisional dimensions and joint bounds with the agreed CAD model and add mass, center-of-mass, and inertia data for each link.
+
+## Verification still needed
+
+- Confirm the seven-axis definition and frame conventions against the team CAD/DH model.
+- Check every IK sample for position error, orientation error, solver status, and joint-limit violations.
+- Add robot and torch collision geometry before claiming link-level collision avoidance; the current lift only raises the TCP above the workpiece plane.
+- Add the Simscape model and compare its inverse-dynamics torques with an independent analytical or MATLAB dynamics check.
+- Record the MATLAB release and toolbox versions used for the final reproducibility run.
+
+## Team roles
+
+- **Member 1** — Mechanical design, CAD, and URDF/model parameters
+- **Member 2** — Simscape assembly and environment
+- **Member 3** — Trajectory generation and inverse kinematics
+- **Member 4** — Inverse dynamics and torque analysis
+- **Member 5** — Verification, visualization, and documentation
 
 ## References
-* Course Material: *Introduction to Robotics (M4609301)* — Week 01 Handout
-* MathWorks Documentation: [Computing Actuator Torques Using Inverse Dynamics](https://www.mathworks.com/help/sm/ug/computing-actuator-torques-using-inverse-dynamics.html)
-* Carbone, G., & Laribi, M. A. (Eds.). *Robot Design: From Theory to Service Applications*. Springer.
+
+- Course material: *Introduction to Robotics (M4609301)* — Week 01 Handout
+- MathWorks: [Computing Actuator Torques Using Inverse Dynamics](https://www.mathworks.com/help/sm/ug/computing-actuator-torques-using-inverse-dynamics.html)
+- Carbone, G., & Laribi, M. A. (Eds.). *Robot Design: From Theory to Service Applications*. Springer.
