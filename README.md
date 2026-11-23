@@ -30,17 +30,6 @@ The serial manipulator provides kinematic redundancy for flexible tool orientati
 
 ---
 
-## Repository Structure
-
-```text
-7-DOF-Welding-Robot/
-├── README.md                  # Project documentation, setup instructions, and analysis
-├── cad_or_urdf/               # Link geometry files, CAD exports, or URDF definitions
-├── matlab/
-│   ├── trajectory_gen.m       # Waypoint and trajectory generator (plus, circle, star + lift)
-│   ├── inverse_dynamics.m     # Torque post-processing and peak load evaluation
-│   └── run_simulation.m       # Master script to initialize parameters and run Simulink
-├── simulink/
 │   └── welding_robot_7dof.slx # Main Simscape Multibody & Trajectory Controller model
 └── results/
     ├── joint_torques.png      # Simulated actuator torque profiles (Nm) vs. time
