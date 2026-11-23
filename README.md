@@ -81,11 +81,11 @@ The serial manipulator provides kinematic redundancy for flexible tool orientati
 ---
 
 ## Team Members
-* **Member 1** – Mechanical Design & Simscape Multibody Assembly
-* **Member 2** – Trajectory Generation (Plus, Circle, Star & Lift Logic)
-* **Member 3** – Inverse Dynamics & Actuator Torque Analysis
-* **Member 4** – Simulation Verification, Plotting & Documentation
-
+* **Member 1** – Mechanical Design & CAD / URDF Modeling
+* **Member 2** – Simscape Multibody Assembly & Environment Setup
+* **Member 3** – Trajectory Generation (Plus, Circle, Star & Lift Logic)
+* **Member 4** – Inverse Dynamics & Actuator Torque Analysis
+* **Member 5** – Simulation Verification, Data Visualization & Documentation
 ---
 
 ## References
