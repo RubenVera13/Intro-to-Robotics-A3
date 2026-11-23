@@ -30,27 +30,6 @@ The serial manipulator provides kinematic redundancy for flexible tool orientati
 * **Trajectory Controller:** Generates motion actuation signals for the torch tip across the plus, circle, and star paths, including lift segments between shapes.
 * **Torque Instrumentation:** Simulink scopes monitor actuator torque outputs (`Nm`) for the Waist Revolute, Shoulder, Upper Elbow, Arm Twist, and Wrist Universal (Inboard/Outboard) joints.
 
----
-
-## Repository Structure
-
-```text
-7-DOF-Welding-Robot/
-├── README.md                  # Project documentation, setup instructions, and analysis
-├── cad_or_urdf/               # Link geometry files, CAD exports, or URDF definitions
-├── matlab/
-│   ├── trajectory_gen.m       # Waypoint and trajectory generator (plus, circle, star + lift)
-│   ├── inverse_dynamics.m     # Torque post-processing and peak load evaluation
-│   └── run_simulation.m       # Master script to initialize parameters and run Simulink
-├── simulink/
-│   └── welding_robot_7dof.slx # Main Simscape Multibody & Trajectory Controller model
-└── results/
-    ├── joint_torques.png      # Simulated actuator torque profiles (Nm) vs. time
-    └── torch_trajectory.png   # 3D end-effector path showing trace and lift phases
-```
-
----
-
 ## Getting Started
 
 ### Prerequisites
