@@ -68,4 +68,22 @@ params.ik.torch_tilt_rad = deg2rad(15);
 % inverseKinematics order: orientation-error components, then xyz position.
 params.ik.weights = [0.1 0.5 0.5 1.0 1.0 1.0];
 params.ik.initial_guess_rad = [0.0 -0.35 0.85 0.0 0.75 0.0 0.0];
+% Random restarts can jump to a different arm configuration mid-path, which
+% shows up as torque spikes later. Keep them off for sequential tracking.
+params.ik.allow_random_restart = false;
+params.ik.max_iterations = 1500;
+params.ik.solution_tolerance = 1e-6;   % MATLAB default
+
+% Joint-motion export for Simscape (q, qd, qdd). The window is in samples;
+% set it to 1 to disable smoothing and differentiate the raw IK output.
+params.motion.smoothing_method = 'sgolay';
+params.motion.smoothing_window_samples = 9;
+
+% Pass/fail thresholds used by check_ik_result.m.
+params.checks.max_position_error_m = 0.5e-3;
+params.checks.max_orientation_error_rad = deg2rad(1.0);
+params.checks.joint_limit_margin_rad = deg2rad(2.0);
+% A larger step between consecutive samples (dt = sample_time_s) usually
+% means the IK switched configuration branch.
+params.checks.max_joint_step_rad = deg2rad(3.0);
 end
