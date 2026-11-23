@@ -106,8 +106,22 @@ y_tool = [0; 1; 0];
 x_tool = cross(y_tool, z_tool);
 R_torch = [x_tool, y_tool, z_tool];
 
+reach = check_path_reachability(pos_traj, R_torch, params);
+fprintf('Path reach: up to %.0f%% of the shoulder-to-wrist reach.\n', ...
+    100*reach.max_reach_ratio);
+if ~reach.ok
+    error('generate_welding_ik:unreachable', ...
+        ['%d of %d path samples need a wrist center outside the arm''s ' ...
+        'reach (%.3f-%.3f m from the shoulder). Move the workpiece or ' ...
+        'change the link lengths.'], nnz(reach.unreachable), ...
+        numel(reach.unreachable), reach.min_reach_m, reach.max_reach_m);
+end
+
 ik = inverseKinematics('RigidBodyTree', robot);
 ik.SolverAlgorithm = 'LevenbergMarquardt';
+ik.SolverParameters.AllowRandomRestart = params.ik.allow_random_restart;
+ik.SolverParameters.MaxIterations = params.ik.max_iterations;
+ik.SolverParameters.SolutionTolerance = params.ik.solution_tolerance;
 weights = params.ik.weights;
 
 num_steps = numel(time_vec);
@@ -148,12 +162,38 @@ fprintf('Maximum orientation error: %.3f deg\n', ...
 fprintf('Maximum sample-to-sample joint step: %.3f deg\n', ...
     rad2deg(max(max_joint_step_rad)));
 
+%% Smooth joint motion and compute qd, qdd for Simscape
+motion = compute_joint_derivatives(q_traj, dt, params);
+T_motion = forward_kinematics_tip(motion.q, params);
+motion_position_error_m = vecnorm( ...
+    squeeze(T_motion(1:3, 4, :))' - pos_traj, 2, 2);
+motion_orientation_error_rad = zeros(num_steps, 1);
+for k = 1:num_steps
+    relative_rotation = R_torch' * T_motion(1:3, 1:3, k);
+    cosine_angle = (trace(relative_rotation) - 1)/2;
+    motion_orientation_error_rad(k) = acos(max(-1, min(1, cosine_angle)));
+end
+fprintf('Exported (smoothed) motion: max position error %.3f mm\n', ...
+    1e3*max(motion_position_error_m));
+
 %% Export data for downstream Simulink integration
+% q_ts/qd_ts/qdd_ts hold one timeseries per joint. joint_motion_ts packs
+% [q(1:7), qd(1:7), qdd(1:7)] into one 21-column timeseries for a single
+% From Workspace block feeding Simulink-PS Converters set to "Provide
+% signals" (input + first and second derivatives).
 q_ts = struct();
+qd_ts = struct();
+qdd_ts = struct();
 for j = 1:numel(params.robot.joint_labels)
     label = params.robot.joint_labels{j};
-    q_ts.(label) = timeseries(q_traj(:, j), time_vec, 'Name', label);
+    q_ts.(label) = timeseries(motion.q(:, j), time_vec, 'Name', label);
+    qd_ts.(label) = timeseries(motion.qd(:, j), time_vec, ...
+        'Name', [label '_qd']);
+    qdd_ts.(label) = timeseries(motion.qdd(:, j), time_vec, ...
+        'Name', [label '_qdd']);
 end
+joint_motion_ts = timeseries([motion.q, motion.qd, motion.qdd], ...
+    time_vec, 'Name', 'joint_motion');
 
 %% Plot the tool path and joint angles
 figure('Name', '7R Welding-Path Kinematic Prototype', ...
@@ -185,12 +225,36 @@ ylabel('Joint angle [rad]');
 title('Seven revolute joint trajectories');
 legend(params.robot.joint_labels, 'Location', 'bestoutside');
 
+figure('Name', 'Exported joint velocities and accelerations', ...
+    'Position', [120 120 1100 450]);
+subplot(1, 2, 1);
+plot(time_vec, motion.qd, 'LineWidth', 1.1);
+grid on;
+xlabel('Time [s]');
+ylabel('Joint velocity [rad/s]');
+title('qd (smoothed)');
+subplot(1, 2, 2);
+plot(time_vec, motion.qdd, 'LineWidth', 1.1);
+grid on;
+xlabel('Time [s]');
+ylabel('Joint acceleration [rad/s^2]');
+title('qdd (smoothed)');
+legend(params.robot.joint_labels, 'Location', 'bestoutside');
+
 result.params = params;
 result.robot = robot;
 result.position_m = pos_traj;
 result.time_s = time_vec;
 result.q_rad = q_traj;
 result.q_ts = q_ts;
+result.qd_ts = qd_ts;
+result.qdd_ts = qdd_ts;
+result.joint_motion_ts = joint_motion_ts;
+result.motion = motion;
+result.motion_position_error_m = motion_position_error_m;
+result.motion_orientation_error_rad = motion_orientation_error_rad;
+result.reach = reach;
+result.R_torch = R_torch;
 result.pose_error_norm = pose_error_norm;
 result.position_error_m = position_error_m;
 result.orientation_error_rad = orientation_error_rad;
