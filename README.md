@@ -2,7 +2,7 @@
 **Course:** Introduction to Robotics, NTUST, Fall 2026 (final project)
 **Team:** Emmanuel Acosta, Ivan Arce,  Mauricio Olmedo, Rafael Pereira, Ruben Vera
 ## Project Overview
-This repository contains the design, kinematic/dynamic modeling, and simulation files for a **7-degree-of-freedom (7-DOF) robotic manipulator** equipped with a welding torch. Developed as the final team project for **Introduction to Robotics (Course No. M4609301)**[cite: 1, 20, 32], this project uses **MATLAB**, **Simulink**, and **Simscape Multibody** to simulate automated multi-shape welding trajectories and compute joint actuator torque profiles via inverse dynamics[cite: 21, 29, 39].
+This repository contains the design, kinematic/dynamic modeling, and simulation files for a **7-degree-of-freedom (7-DOF) robotic manipulator** equipped with a welding torch. Developed as the final team project for **Introduction to Robotics , this project uses **MATLAB**, **Simulink**, and **Simscape Multibody** to simulate automated multi-shape welding trajectories and compute joint actuator torque profiles via inverse dynamics
 
 ### Key Objectives
 * **Multi-Shape Path Tracing:** Guide the welding torch tip smoothly across three distinct geometric patterns—a **plus sign**, a **circle**, and a **star sign**—on a flat workpiece surface.
@@ -16,17 +16,17 @@ This repository contains the design, kinematic/dynamic modeling, and simulation 
 ### Manipulator Configuration (7-DOF)
 The serial manipulator provides kinematic redundancy for flexible tool orientation and smooth path execution:
 1. **Waist Revolute Joint** (Base rotation)
-2. **Shoulder Joint**[cite: 39]
-3. **Upper Elbow Joint**[cite: 39]
-4. **Arm Twist Joint**[cite: 39]
-5. **Wrist Universal Joint (Inboard)**[cite: 39]
-6. **Wrist Universal Joint (Outboard)**[cite: 39]
-7. **Tool / End-Effector Interface** (Welding Torch)[cite: 39]
+2. **Shoulder Joint**
+3. **Upper Elbow Joint**
+4. **Arm Twist Joint**
+5. **Wrist Universal Joint (Inboard)**
+6. **Wrist Universal Joint (Outboard)**
+7. **Tool / End-Effector Interface** (Welding Torch)
 
 ### Simscape Multibody & Control Blocks
-* **Environment & Constraints:** `Floor` reference frame, `Workpiece` geometry positioned via `Workpiece XForm`, `Solver Configuration` (`f(x) = 0`), and `Mechanism Configuration`[cite: 39].
-* **Trajectory Controller:** Generates motion actuation signals for the torch tip across the plus, circle, and star paths, including lift segments between shapes[cite: 39].
-* **Torque Instrumentation:** Simulink scopes monitor actuator torque outputs (`Nm`) for the Waist Revolute, Shoulder, Upper Elbow, Arm Twist, and Wrist Universal (Inboard/Outboard) joints[cite: 39].
+* **Environment & Constraints:** `Floor` reference frame, `Workpiece` geometry positioned via `Workpiece XForm`, `Solver Configuration` (`f(x) = 0`), and `Mechanism Configuration`.
+* **Trajectory Controller:** Generates motion actuation signals for the torch tip across the plus, circle, and star paths, including lift segments between shapes.
+* **Torque Instrumentation:** Simulink scopes monitor actuator torque outputs (`Nm`) for the Waist Revolute, Shoulder, Upper Elbow, Arm Twist, and Wrist Universal (Inboard/Outboard) joints.
 
 ---
 
