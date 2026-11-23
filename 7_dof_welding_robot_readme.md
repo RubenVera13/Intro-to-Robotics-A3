@@ -1,5 +1,8 @@
 # 7-DOF Industrial Welding Robot — Dynamic Modeling & Inverse Dynamics Simulation
 
+**Course:** Introduction to Robotics, NTUST, Fall 2026 (final project)
+**Team:** Emmanuel Acosta, Ivan Arce,  Mauricio Olmedo, Rafael Pereira, Ruben Vera
+
 ## Project Overview
 This repository contains the design, kinematic/dynamic modeling, and simulation files for a **7-degree-of-freedom (7-DOF) robotic manipulator** equipped with a welding torch. Developed as the final team project for **Introduction to Robotics (Course No. M4609301)**, this project uses **MATLAB**, **Simulink**, and **Simscape Multibody** to simulate automated multi-shape welding trajectories and compute joint actuator torque profiles via inverse dynamics.
 
