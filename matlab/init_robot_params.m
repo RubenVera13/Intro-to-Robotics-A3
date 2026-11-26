@@ -44,7 +44,41 @@ params.robot.weld_tip_offset_xyz_m = [0 0 0.15];
 params.robot.joint_limits_rad = repmat([-pi pi], 7, 1);
 params.robot.joint_limits_status = 'provisional +/- pi bounds';
 params.robot.inertial_properties_status = ...
-    'not defined; kinematic model only, no torque claims';
+    'provisional placeholder geometry; replace with CAD values';
+
+% Mass properties. Until CAD values exist, link_mass_properties.m builds
+% each link from simple placeholder parts so the dynamics pipeline runs:
+%   * an aluminium tube from the link's joint to the next joint, or a short
+%     hub tube where that distance is (near) zero;
+%   * a point-like motor mass at the link's own joint;
+%   * on link 7, the welding torch as a solid cylinder up to the tip.
+% These numbers are NOT measurements. Torques computed from them show that
+% the pipeline works; they are not results for the report.
+params.dynamics.source = 'placeholder';   % 'placeholder' or 'cad'
+params.dynamics.density_kg_m3 = 2700;     % aluminium
+params.dynamics.link_outer_radius_m = [0.060 0.055 0.050 0.045 0.040 ...
+    0.035 0.030];
+params.dynamics.wall_thickness_m = 0.005;
+params.dynamics.hub_length_m = 0.08;
+params.dynamics.motor_mass_kg = [2.0 2.0 1.5 1.0 0.8 0.6 0.4];
+params.dynamics.torch_mass_kg = 1.0;
+params.dynamics.torch_radius_m = 0.02;
+
+% CAD values (Member 1). When source = 'cad', these replace the placeholder
+% parts. Units: kg, m, kg*m^2. Express them in each link frame; give the
+% inertia about the link's center of mass as [Ixx Iyy Izz Iyz Ixz Ixy]
+% (tensor elements). One row per link, link 7 including the torch.
+params.dynamics.cad.mass_kg = [];
+params.dynamics.cad.com_m = [];
+params.dynamics.cad.inertia_com_kg_m2 = [];
+
+% Simscape inverse dynamics. Torques from Simscape and from MATLAB's
+% inverseDynamics must agree within this tolerance (per joint).
+params.simscape.model_name = 'welding_robot';
+params.simscape.enabled = true;
+params.checks.torque_match_abs_N_m = 0.05;
+params.checks.torque_match_rel = 0.01;   % fraction of that joint's peak
+params.checks.simscape_tcp_error_m = 1e-3;
 
 params.environment.gravity_m_s2 = [0 0 -9.81];
 params.environment.workpiece_center_m = [0.55 0.00 0.25];
