@@ -40,9 +40,21 @@ params.robot.joint_origins_xyz_m = [
     0 0 0.00];
 params.robot.weld_tip_offset_xyz_m = [0 0 0.15];
 
-% Provisional mathematical bounds only; replace with design-specific stops.
-params.robot.joint_limits_rad = repmat([-pi pi], 7, 1);
-params.robot.joint_limits_status = 'provisional +/- pi bounds';
+% Joint limits [deg], one row per joint: [lower upper]. Starting values
+% typical of this arm layout; confirm each one in the CAD assembly (rotate
+% the joint until something touches, then back off a few degrees) and
+% narrow it where the CAD shows less room.
+params.robot.joint_limits_deg = [
+    -170  170    % Waist
+     -90  110    % Shoulder
+     -10  150    % Upper elbow (bends one way only)
+    -180  180    % Arm twist
+    -120  120    % Wrist inboard
+    -120  120    % Wrist outboard
+    -180  180];  % Tool interface roll
+params.robot.joint_limits_rad = deg2rad(params.robot.joint_limits_deg);
+params.robot.joint_limits_status = ...
+    'starting values; confirm against the CAD assembly';
 params.robot.inertial_properties_status = ...
     'provisional placeholder geometry; replace with CAD values';
 
@@ -81,7 +93,9 @@ params.checks.torque_match_rel = 0.01;   % fraction of that joint's peak
 params.checks.simscape_tcp_error_m = 1e-3;
 
 params.environment.gravity_m_s2 = [0 0 -9.81];
-params.environment.workpiece_center_m = [0.55 0.00 0.25];
+% x = 0.45 m keeps the path within about 78% of the shoulder-to-wrist reach
+% (it needed about 92% at x = 0.55 m, close to full stretch).
+params.environment.workpiece_center_m = [0.45 0.00 0.25];
 
 params.trajectory.sample_time_s = 0.01;
 params.trajectory.clearance_m = 0.05;

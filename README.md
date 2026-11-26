@@ -31,7 +31,7 @@ The kinematic model uses seven single-axis revolute joints:
 | 6 | Wrist outboard | X |
 | 7 | Tool interface roll | Z |
 
-The torch tip is a fixed frame 0.15 m beyond the seventh joint. The dimensions and ±π joint bounds in the prototype are provisional values, not CAD measurements or mechanical stops. The wrist joints are modeled as individual revolute axes, not Simscape Universal Joint blocks.
+The torch tip is a fixed frame 0.15 m beyond the seventh joint. The link dimensions are provisional values, not CAD measurements. The joint limits (`params.robot.joint_limits_deg`) are starting values typical of this layout, still to be confirmed against the CAD assembly. The workpiece sits at x = 0.45 m, so the path uses at most about 77% of the arm's reach. The wrist joints are modeled as individual revolute axes, not Simscape Universal Joint blocks.
 
 ## Run the simulation
 
@@ -79,7 +79,7 @@ All lengths use metres, angles use radians, and time uses seconds. Before making
 ## Verification still needed
 
 - Confirm the seven-axis definition and frame conventions against the team CAD/DH model.
-- Run the IK checks (`check_ik_result.m`) on the final geometry and real joint limits; they currently use provisional ±π bounds.
+- Confirm the joint limits in the CAD assembly and re-run the IK checks (`check_ik_result.m`). With the starting limits, the elbow is the tightest joint: up to 124° of its 150° limit.
 - Add robot and torch collision geometry before claiming link-level collision avoidance; the current lift only raises the TCP above the workpiece plane.
 - Replace the placeholder mass properties with CAD values (`CAD/README.md`), then re-run and confirm `compare_torques` still passes.
 - Record the MATLAB release and toolbox versions used for the final reproducibility run.

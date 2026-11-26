@@ -64,12 +64,16 @@ assert(~far.ok && far.unreachable, 'A 2 m target should be unreachable.');
 dt = params.trajectory.sample_time_s;
 t = (0:dt:4)';
 w = 1.5;
-q_true = repmat(0.4*sin(w*t), 1, 7);
+% Oscillate about the middle of each joint's range so the clean signal is
+% always inside the limits.
+mid = mean(params.robot.joint_limits_rad, 2)';
+q_true = mid + repmat(0.4*sin(w*t), 1, 7);
 noise = 1e-7*sin(977*t);          % deterministic, IK-sized noise
 motion = compute_joint_derivatives(q_true + noise, dt, params);
 inner = 20:numel(t)-20;           % ignore one-sided edge differences
 qd_err = max(abs(motion.qd(inner, 1) - 0.4*w*cos(w*t(inner))));
 qdd_err = max(abs(motion.qdd(inner, 1) + 0.4*w^2*sin(w*t(inner))));
+% (Column 1 is the waist; its range is symmetric, so mid(1) = 0.)
 q_err = max(abs(motion.q(:, 1) - q_true(:, 1)));
 assert(q_err < 1e-5, 'Smoothing moved q by %.2e rad.', q_err);
 assert(qd_err < 1e-3, 'qd error too large: %.2e rad/s.', qd_err);
