@@ -54,8 +54,28 @@ in the links that carry them.
 | link7_tool | | | | | | | | | |
 | torch | | | | | | | | | |
 
-Note: `rigidBody` stores `Inertia` about the **body frame origin** in the
-order `[Ixx Iyy Izz Iyz Ixz Ixy]`. When entering these values in MATLAB,
-shift them from the center of mass with the parallel-axis theorem.
-Simscape solids, by contrast, take inertia about the center of mass. Mixing
-the two is a common cause of torque mismatches in Week 3.
+Combine the torch with link 7 in one row (mass, CoM and inertia of the
+pair), because `params.dynamics.cad` has one row per link.
+
+### Entering the values
+
+In `matlab/init_robot_params.m`:
+
+```matlab
+params.dynamics.source = 'cad';
+params.dynamics.cad.mass_kg = [ ... ];            % 7x1
+params.dynamics.cad.com_m = [ ... ];              % 7x3, link frame
+params.dynamics.cad.inertia_com_kg_m2 = [ ... ];  % 7x6 [Ixx Iyy Izz Iyz Ixz Ixy] about the CoM
+```
+
+Products of inertia are **tensor elements** (Ixy = −∫xy dm). Some CAD tools
+report the integral without the minus sign; check which convention yours
+uses. Enter inertia about the **center of mass**. `link_mass_properties.m`
+applies the parallel-axis shift that `rigidBody` needs, while Simscape takes
+the CoM values directly. Then run `run('matlab/run_simulation.m')`. The
+Simscape model rebuilds itself, and `compare_torques` confirms that both
+models still agree.
+
+Until then, the code uses placeholder parts (aluminium tubes, motor masses
+of 0.4–2 kg, a 1 kg torch; 13.6 kg in total). Torques from those prove the
+pipeline works but are **not** report results.
